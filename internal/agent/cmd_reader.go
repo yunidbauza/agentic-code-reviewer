@@ -6,7 +6,6 @@ import (
 	"io"
 	"os/exec"
 	"sync"
-	"syscall"
 )
 
 // Compile-time interface check
@@ -45,9 +44,9 @@ func (r *cmdReader) Close() error {
 			pid := r.cmd.Process.Pid
 
 			if r.ctx != nil && r.ctx.Err() != nil {
-				// Kill the entire process group (negative PID)
+				// Kill the entire process group
 				// Ignore errors - process may have already exited
-				_ = syscall.Kill(-pid, syscall.SIGKILL)
+				_ = killProcessGroup(pid)
 			}
 
 			// Wait for command to complete and capture exit code
