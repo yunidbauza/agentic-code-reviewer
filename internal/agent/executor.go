@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"io"
 	"os/exec"
-	"syscall"
 )
 
 // executeOptions configures command execution for agent CLI invocations.
@@ -45,8 +44,8 @@ func executeCommand(ctx context.Context, opts executeOptions) (*ExecutionResult,
 		cmd.Dir = opts.WorkDir
 	}
 
-	// Set process group for proper signal handling
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	// Set process group for proper signal handling (Unix only)
+	setSysProcAttr(cmd)
 
 	// Capture stderr for error diagnostics
 	stderr := &bytes.Buffer{}
