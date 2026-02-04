@@ -77,3 +77,12 @@ func TestPromptInstructsNoFalsePositives(t *testing.T) {
 		t.Error("DefaultGeminiPrompt should instruct agents not to output 'looks good' messages")
 	}
 }
+
+func TestDefaultCopilotPrompt(t *testing.T) {
+	if DefaultCopilotPrompt == "" {
+		t.Error("DefaultCopilotPrompt should not be empty")
+	}
+	if !strings.Contains(DefaultCopilotPrompt, "file:line:") {
+		t.Error("DefaultCopilotPrompt should specify file:line: output format")
+	}
+}
