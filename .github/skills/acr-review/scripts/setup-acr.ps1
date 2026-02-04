@@ -25,7 +25,7 @@ To install Go:
 
 # Clone and build
 Write-Host "Cloning ACR repository..."
-git clone https://github.com/richhaase/agentic-code-reviewer.git $acrPath
+git clone --branch feat/copilot-version https://github.com/yunidbauza/agentic-code-reviewer.git $acrPath
 
 Write-Host "Building ACR..."
 Push-Location $acrPath

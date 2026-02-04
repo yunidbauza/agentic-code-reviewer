@@ -23,7 +23,7 @@ fi
 
 # Clone and build
 echo "Cloning ACR repository..."
-git clone https://github.com/richhaase/agentic-code-reviewer.git "$ACR_PATH"
+git clone --branch feat/copilot-version https://github.com/yunidbauza/agentic-code-reviewer.git "$ACR_PATH"
 
 echo "Building ACR..."
 cd "$ACR_PATH"
