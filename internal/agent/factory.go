@@ -30,6 +30,11 @@ var registry = map[string]agentRegistry{
 		newReviewParser:  func(id int) ReviewParser { return NewGeminiOutputParser(id) },
 		newSummaryParser: func() SummaryParser { return NewGeminiSummaryParser() },
 	},
+	"copilot": {
+		newAgent:         func() Agent { return NewCopilotAgent() },
+		newReviewParser:  func(id int) ReviewParser { return NewCopilotOutputParser(id) },
+		newSummaryParser: func() SummaryParser { return NewCopilotSummaryParser() },
+	},
 }
 
 // SupportedAgents lists all valid agent names.
@@ -50,7 +55,7 @@ const DefaultAgent = "codex"
 const DefaultSummarizerAgent = "codex"
 
 // NewAgent creates an Agent by name.
-// Supported agents: codex, claude, gemini
+// Supported agents are listed in SupportedAgents.
 func NewAgent(name string) (Agent, error) {
 	reg, ok := registry[name]
 	if !ok {
