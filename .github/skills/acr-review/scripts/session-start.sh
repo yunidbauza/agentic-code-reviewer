@@ -30,25 +30,32 @@ CACHE_FILE="${PROJECT_ROOT}/.github/.superpowers-hash"
 # Skip regeneration if skills/plans/agents haven't changed.
 # ---------------------------------------------------------------------------
 compute_fingerprint() {
-    # Hash: skill dirs mtimes + plan files + agent files
-    # Compatible with both macOS (stat -f, md5) and Linux (stat -c, md5sum)
-    {
-        for d in "${PROJECT_ROOT}/.agents/skills" \
-                 "${PROJECT_ROOT}/.github/skills" \
-                 "${PROJECT_ROOT}/.claude/skills"; do
-            if [ -d "$d" ]; then
-                find "$d" -name "SKILL.md" -print0 2>/dev/null | \
-                    xargs -0 stat -f '%m %N' 2>/dev/null || \
-                    find "$d" -name "SKILL.md" -exec stat -c '%Y %n' {} \; 2>/dev/null
-            fi
-        done
-        if [ -d "${PROJECT_ROOT}/docs/plans" ]; then
-            find "${PROJECT_ROOT}/docs/plans" -name "*.md" -print0 2>/dev/null | \
-                xargs -0 stat -f '%m %N' 2>/dev/null || \
-                find "${PROJECT_ROOT}/docs/plans" -name "*.md" -exec stat -c '%Y %n' {} \; 2>/dev/null
+    # Hash: skill file paths + modification dates
+    # Uses 'date -r' which works across Git Bash, macOS, and Linux
+    local output=""
+    for d in "${PROJECT_ROOT}/.agents/skills" \
+             "${PROJECT_ROOT}/.github/skills" \
+             "${PROJECT_ROOT}/.claude/skills"; do
+        if [ -d "$d" ]; then
+            while IFS= read -r f; do
+                output+="${f} $(date -r "$f" +%s 2>/dev/null || echo 0)"$'\n'
+            done < <(find "$d" -name "SKILL.md" 2>/dev/null)
         fi
-        find "${PROJECT_ROOT}" -maxdepth 3 -name "*.agent.md" -type f 2>/dev/null
-    } | md5 2>/dev/null || md5sum 2>/dev/null | cut -d' ' -f1 || echo "no-cache"
+    done
+    if [ -d "${PROJECT_ROOT}/docs/plans" ]; then
+        while IFS= read -r f; do
+            output+="${f} $(date -r "$f" +%s 2>/dev/null || echo 0)"$'\n'
+        done < <(find "${PROJECT_ROOT}/docs/plans" -name "*.md" 2>/dev/null)
+    fi
+    while IFS= read -r f; do
+        [ -n "$f" ] && output+="${f}"$'\n'
+    done < <(find "${PROJECT_ROOT}" -maxdepth 3 -name "*.agent.md" -type f 2>/dev/null)
+
+    if [ -z "$output" ]; then
+        echo "no-cache"
+    else
+        echo "$output" | md5sum | cut -d' ' -f1
+    fi
 }
 
 current_hash=$(compute_fingerprint)
